@@ -29,7 +29,7 @@ class BotCommand : BaseCommand("bot") {
             return true
         }
 
-        GameManager.startBot(sender, diff)
+        //GameManager.startBot(sender, diff)
         return true
     }
 

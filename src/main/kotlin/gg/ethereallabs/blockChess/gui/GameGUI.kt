@@ -12,6 +12,7 @@ import gg.ethereallabs.blockChess.gui.subgui.AcceptDrawGUI
 import gg.ethereallabs.blockChess.gui.subgui.PromotionGUI
 import gg.ethereallabs.blockChess.gui.subgui.RequestDrawGUI
 import gg.ethereallabs.blockChess.gui.subgui.SurrendGUI
+import gg.ethereallabs.blockChess.utils.InventorySerializer
 import gg.ethereallabs.blockChess.utils.SyncHelper.runSync
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -27,8 +28,8 @@ import java.util.concurrent.CompletableFuture.runAsync
 class GameGUI(val game: Game, val playerIsWhite: Boolean) : BaseMenu(
     when{
         !Config.resourcepack -> "BlockChess"
-        playerIsWhite -> "<shift:-48>ꔉ"
-        else -> "<shift:-48>ꔈ"
+        playerIsWhite -> "<shift:-48>⸿"
+        else -> "<shift:-48>⸘"
     },
     54
 ) {
@@ -36,7 +37,10 @@ class GameGUI(val game: Game, val playerIsWhite: Boolean) : BaseMenu(
     private var selected: Square? = null
     private var legalFromSelected: List<Move> = emptyList()
 
-    // --- Utility helpers ---
+    init{
+        InventorySerializer.saveInventoryToPDC(if(playerIsWhite) game.white else game.black)
+    }
+
     private fun clearInventories(p: Player?) {
         inv?.clear()
         p?.inventory?.clear()
@@ -343,6 +347,8 @@ class GameGUI(val game: Game, val playerIsWhite: Boolean) : BaseMenu(
                         if (choice) {
                             game.finalizeGame(Game.ResultType.DRAW)
                         }
+                        else
+                            game.drawRequester = null
                     } catch (_: Exception) {
                     }
                 }.open(player)
@@ -377,6 +383,8 @@ class GameGUI(val game: Game, val playerIsWhite: Boolean) : BaseMenu(
                     try {
                         if (choice) {
                             game.drawRequester = player
+                            val target = getOppositePlayer(player)
+                            BlockChess.instance.sendMessage("<yellow>Your opponent has requested you a draw!", target)
                         }
                         else{
                             BlockChess.instance.sendMessage("You have canceled your draw request.")
@@ -430,6 +438,13 @@ class GameGUI(val game: Game, val playerIsWhite: Boolean) : BaseMenu(
         val targetMove = legalFromSelected.firstOrNull { it.to == clickedSquare } ?: return false
         performMoveAsync(p, targetMove)
         return true
+    }
+
+    private fun getOppositePlayer(player: Player): Player?{
+        if(player != game.white && player != game.black)
+            return null
+
+        return if(player == game.white) game.black else game.white
     }
 
     private fun performMoveAsync(p: Player?, targetMove: Move) {

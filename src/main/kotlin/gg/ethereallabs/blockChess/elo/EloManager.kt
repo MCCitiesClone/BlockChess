@@ -1,6 +1,7 @@
 package gg.ethereallabs.blockChess.elo
 
 import gg.ethereallabs.blockChess.BlockChess
+import gg.ethereallabs.blockChess.data.PlayerData
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitRunnable

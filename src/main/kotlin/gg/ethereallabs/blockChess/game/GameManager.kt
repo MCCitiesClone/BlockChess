@@ -2,6 +2,8 @@ package gg.ethereallabs.blockChess.game
 
 import gg.ethereallabs.blockChess.BlockChess
 import gg.ethereallabs.blockChess.elo.EloManager
+import gg.ethereallabs.blockChess.engine.EnemyData
+import gg.ethereallabs.blockChess.gui.GameGUI
 import gg.ethereallabs.blockChess.gui.subgui.AcceptDrawGUI
 import gg.ethereallabs.blockChess.gui.subgui.RequestDrawGUI
 import gg.ethereallabs.blockChess.gui.subgui.PromotionGUI
@@ -15,6 +17,8 @@ object GameManager {
 
     private val pendingInvites: MutableMap<UUID, Invitation> = ConcurrentHashMap()
     private val activeGamesByPlayer: MutableMap<UUID, Game> = ConcurrentHashMap()
+
+    val playersAwaitingInvRestore : MutableMap<UUID?, GameGUI?> = ConcurrentHashMap()
 
     val playersPromoting: MutableMap<UUID, PromotionGUI?> = ConcurrentHashMap()
     val playersSurrending : MutableMap<UUID, SurrendGUI?> = ConcurrentHashMap()
@@ -100,6 +104,7 @@ object GameManager {
     fun end(game: Game) {
         val white = game.white
         val black = game.black
+
         game.stop()
         if (white != null) {
             activeGamesByPlayer.remove(white.uniqueId)
@@ -107,16 +112,23 @@ object GameManager {
         if (black != null) {
             activeGamesByPlayer.remove(black.uniqueId)
         }
+
+        Bukkit.getScheduler().runTaskLater(BlockChess.instance, Runnable {
+            playersAwaitingInvRestore.put(white?.uniqueId, game.guiWhite)
+            playersAwaitingInvRestore.put(black?.uniqueId, game.guiBlack)
+        }, 2L)
     }
 
-    fun startBot(player: Player, difficulty: Int) {
+    fun startBot(player: Player, difficulty: Int, enemyData : EnemyData) {
         if (activeGamesByPlayer.containsKey(player.uniqueId)) {
             player.sendMessage(BlockChess.mm.deserialize("<red>You already are in a match."))
             return
         }
         val game = Game()
+        game.botData = enemyData
+        val enemyName = "${enemyData.color}${enemyData.name}"
         game.startAgainstBot(player, difficulty, true)
         activeGamesByPlayer[player.uniqueId] = game
-        player.sendMessage(BlockChess.mm.deserialize("<gray>Match against <yellow>Stockfish</yellow> started. Difficulty: <aqua>$difficulty</aqua>"))
+        player.sendMessage(BlockChess.mm.deserialize("<gray>Match against $enemyName<gray> started."))
     }
 }

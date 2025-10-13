@@ -4,14 +4,15 @@ import gg.ethereallabs.blockChess.BlockChess
 import gg.ethereallabs.blockChess.gui.models.BaseMenu
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 
-class MainGUI : BaseMenu("<shift:-48>ꔴ", 54) {
+class MainGUI : BaseMenu("<shift:-48>ⷀ", 54) {
     override fun draw(p: Player?) {
         val globalOnlineItem = createItem(
-            BlockChess.mm.deserialize("<dark_green>\uD83C\uDF0E Global Online"),
+            BlockChess.mm.deserialize("<blue>\uD83C\uDF10 Global Online"),
             Material.IRON_NUGGET,
             mutableListOf(
                 BlockChess.mm.deserialize("<gray>Challenge other players <yellow>across the network<gray>!")
@@ -22,7 +23,7 @@ class MainGUI : BaseMenu("<shift:-48>ꔴ", 54) {
         globalMeta.setCustomModelData(449)
         globalOnlineItem.itemMeta = globalMeta
         val onlineItem = createItem(
-            Component.text("Online", NamedTextColor.YELLOW),
+            Component.text("⚔ Online", NamedTextColor.YELLOW),
             Material.IRON_NUGGET,
             mutableListOf(
                 BlockChess.mm.deserialize("<gray>Challenge another player"),
@@ -34,12 +35,12 @@ class MainGUI : BaseMenu("<shift:-48>ꔴ", 54) {
         onlineMeta.setCustomModelData(449)
         onlineItem.itemMeta = onlineMeta
         val botItem = createItem(
-            Component.text("Bot", NamedTextColor.YELLOW),
+            Component.text("\uD83E\uDD16 Bot", NamedTextColor.AQUA).decoration(TextDecoration.ITALIC, false),
             Material.IRON_NUGGET,
             mutableListOf(
-                BlockChess.mm.deserialize("<gray>Face the machine!"),
-                BlockChess.mm.deserialize("<gray>Choose from a list of AI opponents,"),
-                BlockChess.mm.deserialize("<gray>each with their own rating and skill."),
+                BlockChess.mm.deserialize("<gray>Face the machine!").decoration(TextDecoration.ITALIC, false),
+                BlockChess.mm.deserialize("<gray>Choose from a list of AI opponents,").decoration(TextDecoration.ITALIC, false),
+                BlockChess.mm.deserialize("<gray>each with their own rating and skill.").decoration(TextDecoration.ITALIC, false),
             ),
             1
         )
@@ -62,6 +63,13 @@ class MainGUI : BaseMenu("<shift:-48>ꔴ", 54) {
         slot: Int,
         e: InventoryClickEvent?
     ) {
-
+        when (slot % 9) {
+            in 0..2 -> {  }
+            in 3..5 -> {  }
+            in 6..8 -> {
+                if(p != null)
+                    CpuGUI().open(p)
+            }
+        }
     }
 }

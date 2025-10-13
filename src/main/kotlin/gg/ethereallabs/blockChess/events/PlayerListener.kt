@@ -5,6 +5,7 @@ import gg.ethereallabs.blockChess.data.LocalStorage
 import gg.ethereallabs.blockChess.elo.EloManager
 import gg.ethereallabs.blockChess.game.Game
 import gg.ethereallabs.blockChess.game.GameManager
+import gg.ethereallabs.blockChess.utils.InventorySerializer
 import org.bukkit.Bukkit
 import org.bukkit.Sound
 import org.bukkit.entity.Player
@@ -21,6 +22,7 @@ class PlayerListener: Listener {
         val player = event.player
 
         EloManager.cancelRemoval(player.uniqueId)
+        InventorySerializer.restoreInventoryFromPDC(player)
 
         if (LocalStorage.playerHasData(player))
             LocalStorage.loadPlayerData(player)
@@ -35,18 +37,25 @@ class PlayerListener: Listener {
     @EventHandler
     fun onInventoryClose(event: InventoryCloseEvent) {
         val player = event.player as Player
-        val game = GameManager.getGame(player)
-        if (game == null) {
+
+        if(GameManager.playersAwaitingInvRestore.containsKey(player.uniqueId)){
+            println("Restoring player inventory after closing inventory")
+            InventorySerializer.restoreInventoryFromPDC(player)
+            GameManager.playersAwaitingInvRestore.remove(player.uniqueId)
             return
         }
 
+        val game = GameManager.getGame(player)
+
+        if (game == null) {
+            return
+        }
         val promoGUI = GameManager.playersPromoting[player.uniqueId]
         val surrendGUI = GameManager.playersSurrending[player.uniqueId]
         val requestDrawGUI = GameManager.playersRequestingDraw[player.uniqueId]
         val acceptingDrawGUI = GameManager.playersAcceptingDraw[player.uniqueId]
 
         val gui = game.getPlayerGUI(player)
-
         if (event.inventory == promoGUI?.getInventory()) {
             GameManager.playersPromoting.remove(player.uniqueId)
             BlockChess.instance.sendMessage("<red>You need to choose a piece!", player)
@@ -56,7 +65,6 @@ class PlayerListener: Listener {
             }, 3L)
             return
         }
-
         if (event.inventory == surrendGUI?.getInventory()) {
             GameManager.playersSurrending.remove(player.uniqueId)
             Bukkit.getScheduler().runTaskLater(BlockChess.instance, Runnable {
@@ -64,7 +72,6 @@ class PlayerListener: Listener {
             }, 3L)
             return
         }
-
         if (event.inventory == requestDrawGUI?.getInventory()) {
             GameManager.playersRequestingDraw.remove(player.uniqueId)
             Bukkit.getScheduler().runTaskLater(BlockChess.instance, Runnable {
@@ -72,7 +79,6 @@ class PlayerListener: Listener {
             }, 3L)
             return
         }
-
         if (event.inventory == acceptingDrawGUI?.getInventory()) {
             GameManager.playersAcceptingDraw.remove(player.uniqueId)
             Bukkit.getScheduler().runTaskLater(BlockChess.instance, Runnable {
@@ -80,7 +86,6 @@ class PlayerListener: Listener {
             }, 3L)
             return
         }
-
 
         if (gui?.getInventory() == event.inventory &&
             !GameManager.playersPromoting.containsKey(player.uniqueId) &&

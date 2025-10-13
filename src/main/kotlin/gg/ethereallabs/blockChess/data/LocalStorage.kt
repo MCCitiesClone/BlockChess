@@ -7,7 +7,7 @@ import com.google.gson.JsonSerializationContext
 import com.google.gson.reflect.TypeToken
 import gg.ethereallabs.blockChess.BlockChess
 import gg.ethereallabs.blockChess.elo.EloManager
-import gg.ethereallabs.blockChess.elo.PlayerData
+import gg.ethereallabs.blockChess.data.PlayerData
 import gg.ethereallabs.blockChess.utils.SyncHelper.runSync
 import org.bukkit.entity.Player
 import java.io.File

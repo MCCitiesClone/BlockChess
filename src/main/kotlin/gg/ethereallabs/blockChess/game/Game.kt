@@ -7,7 +7,8 @@ import gg.ethereallabs.blockChess.BlockChess
 import gg.ethereallabs.blockChess.config.Config
 import gg.ethereallabs.blockChess.data.LocalStorage
 import gg.ethereallabs.blockChess.elo.EloManager
-import gg.ethereallabs.blockChess.elo.PlayerData
+import gg.ethereallabs.blockChess.data.PlayerData
+import gg.ethereallabs.blockChess.engine.EnemyData
 import gg.ethereallabs.blockChess.engine.UciEngine
 import gg.ethereallabs.blockChess.events.ChessListener
 import gg.ethereallabs.blockChess.gui.GameGUI
@@ -42,8 +43,8 @@ class Game {
     var blackTimeMs: Long = 5 * 60 * 1000
     private var lastTickMs: Long = System.currentTimeMillis()
 
-    private var guiWhite: GameGUI? = null
-    private var guiBlack: GameGUI? = null
+    var guiWhite: GameGUI? = null
+    var guiBlack: GameGUI? = null
 
     // Engine
     var againstBot: Boolean = false
@@ -51,6 +52,7 @@ class Game {
     private var engine: UciEngine? = null
     private var engineThinking: Boolean = false
     private var engineSkill: Int? = null
+    var botData : EnemyData? = null
 
     private var matchResult : ResultType? = null
 
@@ -92,12 +94,10 @@ class Game {
             guiBlack?.open(human)
         }
 
-        // Start engine
         engine = UciEngine(Config.enginePath).apply {
             try {
                 start()
                 initLevel(engineSkill)
-                human.sendMessage(BlockChess.mm.deserialize("<gray>Stockfish initialized (skill <aqua>$engineSkill</aqua>)."))
             } catch (ex: Exception) {
                 human.sendMessage(BlockChess.mm.deserialize("<red>Impossible to start chess engine: ${ex.message}"))
             }
@@ -203,9 +203,9 @@ class Game {
 
     private fun sendHumanGameMessage(human: Player, won: Boolean, wEmoji: String,lEmoji : String, reason: String) {
         if (won)
-            BlockChess.instance.sendMessage("<bold><#f3fa6b>$wEmoji</bold> You won against <#97ff82>Stockfish <gray>($reason)", human)
+            BlockChess.instance.sendMessage("<bold><#f3fa6b>$wEmoji</bold> You won against ${botData?.color}${botData?.name} <gray>($reason)", human)
         else
-            BlockChess.instance.sendMessage("<bold><red>$lEmoji</bold> You lost against <#97ff82>Stockfish <gray>($reason)", human)
+            BlockChess.instance.sendMessage("<bold><red>$lEmoji</bold> You lost against ${botData?.color}${botData?.name} <gray>($reason)", human)
     }
 
     private fun sendDrawMessage(human: Player, emoji: String, reason: String) {
@@ -324,7 +324,7 @@ class Game {
         val wtime = whiteTimeMs
         val btime = blackTimeMs
         val human = if (engineSide == Side.WHITE) black else white
-        human?.let { BlockChess.instance.sendMessage("<yellow>Stockfish <gray>is thinking...", it) }
+        human?.let { BlockChess.instance.sendMessage("${botData?.color}${botData?.name} <gray>is thinking...", it) }
 
         engine!!.positionFen(fen)
 
@@ -344,12 +344,8 @@ class Game {
 
         runAsync {
             try {
-                if (skill in 1..4) {
-                    val movetime = (skill * 50L).coerceIn(50, 200)
-                    engine!!.goBestMoveMovetime(movetime, engineCallback)
-                } else {
-                    engine!!.goBestMoveWTimeBTime(wtime, btime, 0, 0, engineCallback)
-                }
+                val movetime = (skill * 50L).coerceIn(50, 200)
+                engine!!.goBestMoveMovetime(movetime, engineCallback)
             } catch (_: Exception) {
                 val alloc = ((if (board.sideToMove == Side.WHITE) wtime else btime) / 20).coerceIn(100, 2000)
                 engine!!.goBestMoveMovetime(alloc, engineCallback)

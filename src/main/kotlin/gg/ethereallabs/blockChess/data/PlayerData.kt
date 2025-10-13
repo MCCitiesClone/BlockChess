@@ -1,4 +1,4 @@
-package gg.ethereallabs.blockChess.elo
+package gg.ethereallabs.blockChess.data
 
 import java.time.Instant
 
