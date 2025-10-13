@@ -79,6 +79,12 @@ class Game {
     }
 
     fun startAgainstBot(human: Player, difficulty: Int, humanIsWhite: Boolean = true) {
+        if(!Config.botEnabled){
+            BlockChess.instance.sendMessage("<red>Bots are currently disabled!", human)
+            human.playSound(human.location, Sound.ENTITY_VILLAGER_NO, 1f, 1f)
+            return
+        }
+
         setupBoard()
         againstBot = true
         engineSkill = difficulty

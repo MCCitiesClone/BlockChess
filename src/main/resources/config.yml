@@ -2,3 +2,5 @@ resourcepack:
   enabled: true
 engine:
   path: plugins/BlockChess/stockfish.exe
+bot_gamemode:
+  enabled: true

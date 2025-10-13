@@ -1,11 +1,13 @@
 package gg.ethereallabs.blockChess.gui
 
 import gg.ethereallabs.blockChess.BlockChess
+import gg.ethereallabs.blockChess.config.Config
 import gg.ethereallabs.blockChess.gui.models.BaseMenu
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
+import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 
@@ -38,9 +40,9 @@ class MainGUI : BaseMenu("<shift:-48>ⷀ", 54) {
             Component.text("\uD83E\uDD16 Bot", NamedTextColor.AQUA).decoration(TextDecoration.ITALIC, false),
             Material.IRON_NUGGET,
             mutableListOf(
-                BlockChess.mm.deserialize("<gray>Face the machine!").decoration(TextDecoration.ITALIC, false),
-                BlockChess.mm.deserialize("<gray>Choose from a list of AI opponents,").decoration(TextDecoration.ITALIC, false),
-                BlockChess.mm.deserialize("<gray>each with their own rating and skill.").decoration(TextDecoration.ITALIC, false),
+                BlockChess.mm.deserialize("<gray>Face the machine!"),
+                BlockChess.mm.deserialize("<gray>Choose from a list of AI opponents,"),
+                BlockChess.mm.deserialize("<gray>each with their own rating and skill."),
             ),
             1
         )
@@ -63,12 +65,19 @@ class MainGUI : BaseMenu("<shift:-48>ⷀ", 54) {
         slot: Int,
         e: InventoryClickEvent?
     ) {
+        if(slot > 53) return
         when (slot % 9) {
             in 0..2 -> {  }
             in 3..5 -> {  }
             in 6..8 -> {
-                if(p != null)
+                if(p != null) {
+                    if(!Config.botEnabled){
+                        BlockChess.instance.sendMessage("<red>Bots are currently disabled!", p)
+                        p.playSound(p.location, Sound.ENTITY_VILLAGER_NO, 1f, 1f)
+                        return
+                    }
                     CpuGUI().open(p)
+                }
             }
         }
     }

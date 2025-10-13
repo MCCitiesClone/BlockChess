@@ -106,17 +106,22 @@ object GameManager {
         val black = game.black
 
         game.stop()
+
+        Bukkit.getScheduler().runTaskLater(BlockChess.instance, Runnable {
+            if(white != null) {
+                playersAwaitingInvRestore.put(white.uniqueId, game.guiWhite)
+            }
+            if (black != null) {
+                playersAwaitingInvRestore.put(black.uniqueId, game.guiBlack)
+            }
+        }, 2L)
+
         if (white != null) {
             activeGamesByPlayer.remove(white.uniqueId)
         }
         if (black != null) {
             activeGamesByPlayer.remove(black.uniqueId)
         }
-
-        Bukkit.getScheduler().runTaskLater(BlockChess.instance, Runnable {
-            playersAwaitingInvRestore.put(white?.uniqueId, game.guiWhite)
-            playersAwaitingInvRestore.put(black?.uniqueId, game.guiBlack)
-        }, 2L)
     }
 
     fun startBot(player: Player, difficulty: Int, enemyData : EnemyData) {
