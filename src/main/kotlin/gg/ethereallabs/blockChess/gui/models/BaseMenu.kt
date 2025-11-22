@@ -25,6 +25,7 @@ abstract class BaseMenu(private val title: Component, val size: Int) : Listener 
     constructor(title: String, size: Int) : this(LegacyComponentSerializer.legacyAmpersand().deserialize(title), size)
 
     fun open(p: Player) {
+        if (!p.isOnline) return
         inv = Bukkit.createInventory(null, size, title.color(NamedTextColor.WHITE))
         Bukkit.getPluginManager().registerEvents(this, BlockChess.instance)
         viewers.add(p.getUniqueId())

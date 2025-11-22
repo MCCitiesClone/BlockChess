@@ -39,10 +39,10 @@ class AcceptDrawGUI(val gameGUI : GameGUI,
             else -> null
         }
 
-        if (draw != null) {
+        if (draw != null && p != null) {
             choice(draw)
-            p?.closeInventory()
-            gameGUI.open(p!!)
+            p.closeInventory()
+            gameGUI.open(p)
         }
     }
 }

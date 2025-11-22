@@ -39,10 +39,10 @@ class SurrendGUI(val gameGUI : GameGUI,
             else -> null
         }
 
-        if (resign != null) {
+        if (resign != null && p != null) {
             choice(resign)
-            p?.closeInventory()
-            gameGUI.open(p!!)
+            p.closeInventory()
+            gameGUI.open(p)
         }
     }
 }

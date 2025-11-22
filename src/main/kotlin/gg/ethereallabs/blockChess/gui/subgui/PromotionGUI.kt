@@ -58,10 +58,10 @@ class PromotionGUI(val gameGUI : GameGUI,
             else -> null
         }
 
-        if (chosenPiece != null) {
+        if (chosenPiece != null && p != null) {
             onPieceChosen(chosenPiece)
-            p?.closeInventory()
-            gameGUI.open(p!!)
+            p.closeInventory()
+            gameGUI.open(p)
         }
     }
 }

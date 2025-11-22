@@ -60,7 +60,8 @@ class Game {
         WHITE_WIN, BLACK_WIN,
         DRAW_STALEMATE, DRAW_REPETITION, DRAW_INSUFFICIENT, DRAW_100MOVES,
         TIMEOUT_WHITE, TIMEOUT_BLACK,
-        WHITE_RESIGN, BLACK_RESIGN, DRAW
+        WHITE_RESIGN, BLACK_RESIGN, DRAW,
+        WHITE_FORFEIT, BLACK_FORFEIT
     }
 
     // ─────────────────────────────────────────────
@@ -147,8 +148,8 @@ class Game {
                     .clickEvent(ClickEvent.copyToClipboard(pgn))
                     .hoverEvent(HoverEvent.showText(Component.text("Click to copy PGN")))
             )
-        white?.sendMessage(pgnMsg)
-        black?.sendMessage(pgnMsg)
+        white?.takeIf { it.isOnline }?.sendMessage(pgnMsg)
+        black?.takeIf { it.isOnline }?.sendMessage(pgnMsg)
     }
 
     private fun handlePlayerResult(result: ResultType) {
@@ -165,6 +166,8 @@ class Game {
             ResultType.TIMEOUT_WHITE -> announceResult(b, w, bData, wData, 1.0, 0.0, "🏆", "❌", "by time")
             ResultType.WHITE_RESIGN -> announceResult(b, w, bData, wData, 1.0, 0.0, "🏆", "❌", "by resignation")
             ResultType.BLACK_RESIGN -> announceResult(w, b, wData, bData, 1.0, 0.0, "🏆", "❌", "by resignation")
+            ResultType.WHITE_FORFEIT -> announceResult(b, w, bData, wData, 1.0, 0.0, "🏆", "❌", "by abandonment")
+            ResultType.BLACK_FORFEIT -> announceResult(w, b, wData, bData, 1.0, 0.0, "🏆", "❌", "by abandonment")
             ResultType.DRAW_STALEMATE -> announceDraw(w, b, wData, bData, "⚖", "by stalemate")
             ResultType.DRAW_REPETITION -> announceDraw(w, b, wData, bData, "🔁", "by repetition")
             ResultType.DRAW_INSUFFICIENT -> announceDraw(w, b, wData, bData, "🪶", "by insufficient material")
@@ -199,6 +202,7 @@ class Game {
             ResultType.TIMEOUT_WHITE-> sendHumanGameMessage(human, winnerIsWhite == humanIsWhite, "⏳", "⏳", "by time")
             ResultType.TIMEOUT_BLACK -> sendHumanGameMessage(human, winnerIsWhite == humanIsWhite, "⏳", "⏳", "by time")
             ResultType.WHITE_RESIGN, ResultType.BLACK_RESIGN -> sendHumanGameMessage(human, false, "❌","❌", "by resignation")
+            ResultType.WHITE_FORFEIT, ResultType.BLACK_FORFEIT -> sendHumanGameMessage(human, false, "❌","❌", "by abandonment")
             ResultType.DRAW_STALEMATE -> sendDrawMessage(human, "⚖", "by stalemate")
             ResultType.DRAW_REPETITION -> sendDrawMessage(human, "🔁", "by repetition")
             ResultType.DRAW_INSUFFICIENT -> sendDrawMessage(human, "🪶", "by insufficient material")
@@ -208,6 +212,7 @@ class Game {
     }
 
     private fun sendHumanGameMessage(human: Player, won: Boolean, wEmoji: String,lEmoji : String, reason: String) {
+        if (!human.isOnline) return
         if (won)
             BlockChess.instance.sendMessage("<bold><#f3fa6b>$wEmoji</bold> You won against ${botData?.color}${botData?.name} <gray>($reason)", human)
         else
@@ -215,6 +220,7 @@ class Game {
     }
 
     private fun sendDrawMessage(human: Player, emoji: String, reason: String) {
+        if (!human.isOnline) return
         human.sendMessage(BlockChess.mm.deserialize("<yellow>$emoji $reason</yellow>"))
     }
 
@@ -242,11 +248,18 @@ class Game {
         val lName = EloManager.getChessistName(loser)
         val wElo = wData.rating
         val lElo = lData.rating
-        BlockChess.instance.sendMessage("<bold><#f3fa6b>$wEmoji</bold> $wName <#faff9c>($wElo) <#97ff82>$wGainStr <gray>- $lName <#faff9c>($lElo)<red> $bGainStr", winner)
-        BlockChess.instance.sendMessage("<bold><red>$lEmoji</bold> $lName <#faff9c>($lElo) <red>$bGainStr <gray>- $wName <#faff9c>($wElo)<#97ff82> $wGainStr", loser)
-        BlockChess.instance.sendMessage("<bold>You Won", winner)
-        BlockChess.instance.sendMessage("<bold>You Lost", loser)
-        BlockChess.instance.sendMessage("<gray>$cause", winner, loser)
+
+        if (winner.isOnline) {
+            BlockChess.instance.sendMessage("<bold><#f3fa6b>$wEmoji</bold> $wName <#faff9c>($wElo) <#97ff82>$wGainStr <gray>- $lName <#faff9c>($lElo)<red> $bGainStr", winner)
+            BlockChess.instance.sendMessage("<bold>You Won", winner)
+            BlockChess.instance.sendMessage("<gray>$cause", winner)
+        }
+
+        if (loser.isOnline) {
+            BlockChess.instance.sendMessage("<bold><red>$lEmoji</bold> $lName <#faff9c>($lElo) <red>$bGainStr <gray>- $wName <#faff9c>($wElo)<#97ff82> $wGainStr", loser)
+            BlockChess.instance.sendMessage("<bold>You Lost", loser)
+            BlockChess.instance.sendMessage("<gray>$cause", loser)
+        }
     }
 
     private fun announceDraw(w: Player, b: Player, wData: PlayerData, bData: PlayerData, emoji: String, cause: String) {
@@ -262,9 +275,15 @@ class Game {
         val wGainStr = if (wGain >= 0) "+$wGain" else "$wGain"
         val bGainStr = if (bGain >= 0) "+$bGain" else "$bGain"
 
-        BlockChess.instance.sendMessage("<#f3fa6b>$emoji $wName <#faff9c>($wElo) <gray>$wGainStr - $bName <#faff9c>($bElo) <gray>$bGainStr", w)
-        BlockChess.instance.sendMessage("<#f3fa6b>$emoji $bName <#faff9c>($bElo) <gray>$bGainStr - $wName <#faff9c>($wElo) <gray>$wGainStr", b)
-        BlockChess.instance.sendMessage("<gray>$cause", w, b)
+        if (w.isOnline) {
+            BlockChess.instance.sendMessage("<#f3fa6b>$emoji $wName <#faff9c>($wElo) <gray>$wGainStr - $bName <#faff9c>($bElo) <gray>$bGainStr", w)
+            BlockChess.instance.sendMessage("<gray>$cause", w)
+        }
+
+        if (b.isOnline) {
+            BlockChess.instance.sendMessage("<#f3fa6b>$emoji $bName <#faff9c>($bElo) <gray>$bGainStr - $wName <#faff9c>($wElo) <gray>$wGainStr", b)
+            BlockChess.instance.sendMessage("<gray>$cause", b)
+        }
     }
 
     // ─────────────────────────────────────────────
@@ -307,7 +326,7 @@ class Game {
             sound = Sound.UI_BUTTON_CLICK
         }
 
-        listOfNotNull(white, black).forEach {
+        listOfNotNull(white, black).filter { it.isOnline }.forEach {
             it.playSound(it.location, sound, 1f, 1f)
         }
 
@@ -330,7 +349,7 @@ class Game {
         val wtime = whiteTimeMs
         val btime = blackTimeMs
         val human = if (engineSide == Side.WHITE) black else white
-        human?.let { BlockChess.instance.sendMessage("${botData?.color}${botData?.name} <gray>is thinking...", it) }
+        human?.takeIf { it.isOnline }?.let { BlockChess.instance.sendMessage("${botData?.color}${botData?.name} <gray>is thinking...", it) }
 
         engine!!.positionFen(fen)
 

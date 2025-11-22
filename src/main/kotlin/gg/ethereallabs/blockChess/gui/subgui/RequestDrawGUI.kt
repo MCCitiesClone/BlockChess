@@ -39,11 +39,13 @@ class RequestDrawGUI(val gameGUI : GameGUI,
             else -> null
         }
 
-        if (draw != null) {
+        if (draw != null && p != null) {
             choice(draw)
-            p?.closeInventory()
-            gameGUI.open(p!!)
-            BlockChess.instance.sendMessage("<gray>You've requested a draw.")
+            p.closeInventory()
+            gameGUI.open(p)
+            if (draw) {
+                BlockChess.instance.sendMessage("<gray>You've requested a draw.", p)
+            }
         }
     }
 }

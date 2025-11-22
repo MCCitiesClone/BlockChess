@@ -306,6 +306,7 @@ class GameGUI(val game: Game, val playerIsWhite: Boolean) : BaseMenu(
     }
 
     override fun draw(p: Player?) {
+        if (p == null || !p.isOnline) return
         clearInventories(p)
         renderStaticControls()
         displayDrawRequest()
@@ -384,10 +385,12 @@ class GameGUI(val game: Game, val playerIsWhite: Boolean) : BaseMenu(
                         if (choice) {
                             game.drawRequester = player
                             val target = getOppositePlayer(player)
-                            BlockChess.instance.sendMessage("<yellow>Your opponent has requested you a draw!", target)
+                            if (target != null && target.isOnline) {
+                                BlockChess.instance.sendMessage("<yellow>Your opponent has requested you a draw!", target)
+                            }
                         }
                         else{
-                            BlockChess.instance.sendMessage("You have canceled your draw request.")
+                            BlockChess.instance.sendMessage("You have canceled your draw request.", player)
                         }
                     } catch (_: Exception) {
                     }

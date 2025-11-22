@@ -32,6 +32,20 @@ class PlayerListener: Listener {
     fun onPlayerLeave(event: PlayerQuitEvent) {
         val player = event.player
         EloManager.scheduleRemoval(player.uniqueId, BlockChess.instance)
+
+        // Check if player is in an active game and forfeit if so
+        val game = GameManager.getGame(player)
+        if (game != null && !game.ended) {
+            // Determine which side the player is and forfeit accordingly
+            val forfeitResult = if (game.white == player) {
+                Game.ResultType.WHITE_FORFEIT
+            } else {
+                Game.ResultType.BLACK_FORFEIT
+            }
+
+            // Finalize the game with forfeit result
+            game.finalizeGame(forfeitResult)
+        }
     }
 
     @EventHandler
@@ -56,6 +70,16 @@ class PlayerListener: Listener {
         val acceptingDrawGUI = GameManager.playersAcceptingDraw[player.uniqueId]
 
         val gui = game.getPlayerGUI(player)
+
+        // If game has ended, don't reopen any GUI - let player close it
+        if (game.ended) {
+            GameManager.playersPromoting.remove(player.uniqueId)
+            GameManager.playersSurrending.remove(player.uniqueId)
+            GameManager.playersRequestingDraw.remove(player.uniqueId)
+            GameManager.playersAcceptingDraw.remove(player.uniqueId)
+            return
+        }
+
         if (event.inventory == promoGUI?.getInventory()) {
             GameManager.playersPromoting.remove(player.uniqueId)
             BlockChess.instance.sendMessage("<red>You need to choose a piece!", player)

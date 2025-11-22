@@ -108,10 +108,11 @@ object GameManager {
         game.stop()
 
         Bukkit.getScheduler().runTaskLater(BlockChess.instance, Runnable {
-            if(white != null) {
+            // Only schedule restore for online players - offline players will be restored on rejoin
+            if(white != null && white.isOnline) {
                 playersAwaitingInvRestore.put(white.uniqueId, game.guiWhite)
             }
-            if (black != null) {
+            if (black != null && black.isOnline) {
                 playersAwaitingInvRestore.put(black.uniqueId, game.guiBlack)
             }
         }, 2L)
