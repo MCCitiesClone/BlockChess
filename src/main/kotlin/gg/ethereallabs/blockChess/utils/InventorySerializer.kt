@@ -78,15 +78,10 @@ object InventorySerializer {
 
         val key = NamespacedKey(BlockChess.instance, "saved_inventory")
         val invBytes = player.persistentDataContainer.get(key, PersistentDataType.BYTE_ARRAY) ?: return
-
-        Bukkit.getLogger().info("[BlockChess] Scheduling inventory restore for ${player.name}...")
-
         Bukkit.getScheduler().runTaskLater(BlockChess.instance, Runnable {
-            Bukkit.getLogger().info("[BlockChess] Restoring inventory for ${player.name} (delayed)...")
             val items = bytesToItemStackArray(invBytes)
             player.inventory.contents = items
             player.persistentDataContainer.remove(key)
-            Bukkit.getLogger().info("[BlockChess] Inventory restored for ${player.name}.")
         }, 2L)
     }
 

@@ -49,6 +49,8 @@ class AdminCommands : BaseCommand("admin") {
 
         EloManager.players[target.uniqueId]?.rating = amount
 
+        LocalStorage.savePlayerData(target)
+
         BlockChess.instance.sendMessage("<yellow>You've set <gray>${target.name}'s</gray> ELO to <gray>$amount</gray>", sender)
         BlockChess.instance.sendMessage("<yellow>An admin has set your ELO to <gray>$amount</gray>", sender)
     }

@@ -37,8 +37,6 @@ object LocalStorage {
         })
         .create()
 
-
-
     private fun getPlayerFile(playerUuid: UUID): File {
         return File(dataFolder, "$playerUuid.json")
     }
