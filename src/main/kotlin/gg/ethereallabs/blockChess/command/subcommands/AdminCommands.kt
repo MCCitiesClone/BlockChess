@@ -13,17 +13,44 @@ class AdminCommands : BaseCommand("admin") {
         sender: CommandSender,
         args: Array<out String>
     ): Boolean {
+        if (!sender.hasPermission("blockchess.admin")) {
+            BlockChess.instance.sendMessage("<red>You don't have permission to use this command!", sender)
+            return true
+        }
+
         if(args.isEmpty()){
             return true
         }
 
         when(args[0]){
             "elo" -> {
+                if (args.size < 2) {
+                    BlockChess.instance.sendMessage("<red>Usage: /chess admin elo <set|add|remove> <player> <amount>", sender)
+                    return true
+                }
                 when(args[1]){
-                    "set" -> handleSetElo(sender, args)
-                    "add" -> handleAddElo(sender, args)
-                    "remove" -> handleRemoveElo(sender, args)
-                    else -> ""
+                    "set" -> {
+                        if (!sender.hasPermission("blockchess.admin.elo.set")) {
+                            BlockChess.instance.sendMessage("<red>You don't have permission to use this command!", sender)
+                            return true
+                        }
+                        handleSetElo(sender, args)
+                    }
+                    "add" -> {
+                        if (!sender.hasPermission("blockchess.admin.elo.add")) {
+                            BlockChess.instance.sendMessage("<red>You don't have permission to use this command!", sender)
+                            return true
+                        }
+                        handleAddElo(sender, args)
+                    }
+                    "remove" -> {
+                        if (!sender.hasPermission("blockchess.admin.elo.remove")) {
+                            BlockChess.instance.sendMessage("<red>You don't have permission to use this command!", sender)
+                            return true
+                        }
+                        handleRemoveElo(sender, args)
+                    }
+                    else -> BlockChess.instance.sendMessage("<red>Unknown subcommand! Use: set, add, or remove", sender)
                 }
             }
         }

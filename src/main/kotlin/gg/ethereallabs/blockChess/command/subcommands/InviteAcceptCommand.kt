@@ -13,6 +13,11 @@ class InviteAcceptCommand : BaseCommand("accept") {
         sender: CommandSender,
         args: Array<out String>
     ): Boolean {
+        if (!sender.hasPermission("blockchess.accept")) {
+            BlockChess.instance.sendMessage("<red>You don't have permission to use this command!", sender)
+            return true
+        }
+
         if (args.isEmpty()) {
             BlockChess.instance.sendMessage("<red>Specify the inviter: /chess accept <player>", sender)
             return true

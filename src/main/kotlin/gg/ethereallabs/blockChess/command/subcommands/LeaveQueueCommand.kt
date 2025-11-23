@@ -11,6 +11,11 @@ class LeaveQueueCommand : BaseCommand("leavequeue") {
         sender: CommandSender,
         args: Array<out String>
     ): Boolean {
+        if (!sender.hasPermission("blockchess.leavequeue")) {
+            BlockChess.instance.sendMessage("<red>You don't have permission to use this command!", sender)
+            return true
+        }
+
         if(sender !is Player) {
             BlockChess.instance.sendMessage("<red>This command can only be executed by players!", sender)
             return true

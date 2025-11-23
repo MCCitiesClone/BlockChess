@@ -13,6 +13,11 @@ class BotCommand : BaseCommand("bot") {
         sender: CommandSender,
         args: Array<out String>
     ): Boolean {
+        if (!sender.hasPermission("blockchess.bot")) {
+            BlockChess.instance.sendMessage("<red>You don't have permission to use this command!", sender)
+            return true
+        }
+
         if (args.isEmpty()) {
             BlockChess.instance.sendMessage("<red>Choose a difficulty: /chess bot <1-12>", sender)
             return true

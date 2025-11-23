@@ -4,6 +4,74 @@ main: gg.ethereallabs.blockChess.BlockChess
 api-version: '1.21'
 commands:
   chess:
-    description: Main command for HeavenKits
+    description: Main command for BlockChess
     usage: /chess
     aliases: [chess]
+
+permissions:
+  blockchess.*:
+    description: Grants all BlockChess permissions
+    default: op
+    children:
+      blockchess.use: true
+      blockchess.info: true
+      blockchess.bot: true
+      blockchess.invite: true
+      blockchess.accept: true
+      blockchess.decline: true
+      blockchess.leavequeue: true
+      blockchess.admin: true
+
+  blockchess.use:
+    description: Allows opening the main chess GUI
+    default: true
+
+  blockchess.info:
+    description: Allows viewing player chess information
+    default: true
+
+  blockchess.bot:
+    description: Allows playing against chess bots
+    default: true
+
+  blockchess.invite:
+    description: Allows inviting other players to a chess match
+    default: true
+
+  blockchess.accept:
+    description: Allows accepting chess match invitations
+    default: true
+
+  blockchess.decline:
+    description: Allows declining chess match invitations
+    default: true
+
+  blockchess.leavequeue:
+    description: Allows leaving the matchmaking queue
+    default: true
+
+  blockchess.admin:
+    description: Grants all admin permissions
+    default: op
+    children:
+      blockchess.admin.elo: true
+
+  blockchess.admin.elo:
+    description: Grants all ELO management permissions
+    default: op
+    children:
+      blockchess.admin.elo.set: true
+      blockchess.admin.elo.add: true
+      blockchess.admin.elo.remove: true
+
+  blockchess.admin.elo.set:
+    description: Allows setting a player's ELO rating
+    default: op
+
+  blockchess.admin.elo.add:
+    description: Allows adding ELO to a player's rating
+    default: op
+
+  blockchess.admin.elo.remove:
+    description: Allows removing ELO from a player's rating
+    default: op

@@ -39,11 +39,12 @@ class CommandRegistry : CommandExecutor, TabCompleter {
     }
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (!sender.hasPermission("blockchess.commands")) {
-            return true
-        }
-
         if (args.isEmpty()) {
+            if (!sender.hasPermission("blockchess.use")) {
+                BlockChess.instance.sendMessage("<red>You don't have permission to use this command!", sender)
+                return true
+            }
+
             val gui = MainGUI()
             if(sender is Player) {
                 gui.open(sender)

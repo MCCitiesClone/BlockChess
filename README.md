@@ -1,21 +1,35 @@
 # BlockChess
 
-BlockChess is a Minecraft plugin that allows players to engage in chess matches directly within the game. It provides a user-friendly GUI, real-time gameplay, and the ability to play against other players or a powerful AI opponent powered by Fairy-Stockfish.
-
-## Overview
-
-BlockChess transforms the Minecraft experience by integrating the classic game of chess. Players can challenge each other to matches, accept or decline invitations, and even test their skills against a configurable AI. The plugin features an intuitive inventory-based interface where the chessboard and pieces are rendered, and players can make moves by simply clicking on the desired squares.
-
-The plugin's architecture is designed to be lightweight and efficient, ensuring minimal impact on server performance. It leverages the power of the Fairy-Stockfish engine to provide a challenging and realistic chess experience when playing against the bot.
+BlockChess is a Minecraft plugin that brings competitive chess to your server. Play against other players, challenge the AI, or join the matchmaking queue for ELO-rated matches—all within an intuitive inventory-based GUI.
 
 ## Features
 
-- **Player vs. Player (PvP):** Challenge other players on the server to a real-time chess match.
-- **Player vs. Bot (PvE):** Play against the Fairy-Stockfish engine with adjustable difficulty levels.
-- **Intuitive GUI:** A custom inventory-based GUI displays the chessboard, pieces, and game information.
-- **Real-Time Gameplay:** Moves are updated in real-time for both players, providing a seamless experience.
-- **Invitation System:** A simple invitation system allows players to invite, accept, and decline matches.
-- **Configurable:** The plugin can be configured to enable or disable the resource pack and set the path to the Stockfish engine.
+### Game Modes
+- **Player vs. Player:** Challenge players directly via invitations.
+- **Matchmaking System:** Join the queue for automatic ELO-based pairing with balanced opponents
+- **Player vs. Bot:** Face off against Fairy-Stockfish AI with 12 adjustable difficulty levels (200-3000+ ELO)
+
+### ELO Rating System
+- **Dynamic Rating:** Earn or lose rating based on match results and opponent strength
+- **Player Titles:** Unlock prestigious titles as you improve:
+  - **SGM** (Super Grandmaster) - 2600+ ELO
+  - **GM** (Grandmaster) - 2500+ ELO
+  - **IM** (International Master) - 2400+ ELO
+  - **NM** (National Master) - 2200+ ELO
+  - **EXPERT** - 2000+ ELO
+- **Statistics Tracking:** View detailed stats including games played, wins, losses, draws, and current rating
+
+### Gameplay Features
+- **Intuitive GUI:** Click-based interface with visual chessboard in inventory
+- **Real-Time Updates:** Instant move synchronization between players
+- **Full Chess Rules:** Complete implementation including castling, en passant, and pawn promotion
+- **Draw Offers:** Request and accept/decline draws during matches
+- **Surrender Option:** Resign from matches when needed
+- **Auto-Save Inventory:** Player inventories are saved and restored after matches
+
+### Matchmaking
+- **Smart Pairing:** Automatically matches players with similar ELO ratings
+- **Dynamic Range:** Search range expands over time to ensure matches are found
 
 ## Installation
 
@@ -29,14 +43,25 @@ The plugin's architecture is designed to be lightweight and efficient, ensuring 
 
 ### Commands
 
-- `/chess invite <player>`: Invite a player to a chess match.
-- `/chess accept <player>`: Accept a chess match invitation.
-- `/chess decline <player>`: Decline a chess match invitation.
-- `/chess bot <1-12>`: Start a match against the bot with the specified difficulty level.
+**General Commands:**
+- `/chess` - Open the main chess menu GUI
+- `/chess info <player>` - View a player's chess statistics and rating
 
-### Gameplay
+**Player vs Player:**
+- `/chess invite <player>` - Invite a player to a chess match
+- `/chess accept <player>` - Accept a chess match invitation
+- `/chess decline <player>` - Decline a chess match invitation
 
-Once a match starts, the chess GUI will open, displaying the board and pieces. To make a move, simply click on the piece you want to move and then click on the destination square. The board will update in real-time, and your opponent will see your move instantly.
+**Matchmaking:**
+- `/chess leavequeue` - Leave the matchmaking queue
+
+**Player vs Bot:**
+- `/chess bot <1-12>` - Start a match against the AI (difficulty 1-12)
+
+**Admin Commands:**
+- `/chess admin elo set <player> <amount>` - Set a player's ELO rating
+- `/chess admin elo add <player> <amount>` - Add ELO to a player's rating
+- `/chess admin elo remove <player> <amount>` - Remove ELO from a player's rating
 
 ## API Reference
 
@@ -46,8 +71,29 @@ BlockChess does not currently expose a public API for other plugins to use.
 
 The `config.yml` file allows you to configure the following options:
 
-- `resourcepack.enabled`: (Default: `true`) Enable or disable the custom resource pack for the chess pieces.
-- `engine.path`: (Default: `plugins/BlockChess/stockfish.exe`) The path to the Fairy-Stockfish executable.
+- `resourcepack.enabled` - (Default: `true`) Enable or disable the custom resource pack for chess pieces
+- `engine.path` - (Default: `plugins/BlockChess/stockfish.exe`) Path to the Fairy-Stockfish executable
+- `bot_gamemode.enabled` - (Default: `true`) Enable or disable the bot gamemode feature
+
+## Permissions
+
+BlockChess includes a comprehensive permission system:
+
+**Player Permissions (default: true):**
+- `blockchess.use` - Open the main chess GUI
+- `blockchess.info` - View player statistics
+- `blockchess.invite` - Invite players to matches
+- `blockchess.accept` - Accept match invitations
+- `blockchess.decline` - Decline match invitations
+- `blockchess.bot` - Play against the AI
+- `blockchess.leavequeue` - Leave matchmaking queue
+
+**Admin Permissions (default: op):**
+- `blockchess.admin` - Access to all admin commands
+- `blockchess.admin.elo.set` - Set player ELO ratings
+- `blockchess.admin.elo.add` - Add ELO to players
+- `blockchess.admin.elo.remove` - Remove ELO from players
+- `blockchess.*` - All BlockChess permissions
 
 ## Engine Communication
 

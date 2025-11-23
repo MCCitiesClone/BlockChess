@@ -12,6 +12,11 @@ class InfoCommand : BaseCommand("info"){
         sender: CommandSender,
         args: Array<out String>
     ): Boolean {
+        if (!sender.hasPermission("blockchess.info")) {
+            BlockChess.instance.sendMessage("<red>You don't have permission to use this command!", sender)
+            return true
+        }
+
         if (args.isEmpty()) {
             BlockChess.instance.sendMessage("<red>Specify a player: /chess info <player>", sender)
             return true
