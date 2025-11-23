@@ -137,4 +137,20 @@ object GameManager {
         activeGamesByPlayer[player.uniqueId] = game
         player.sendMessage(BlockChess.mm.deserialize("<gray>Match against $enemyName<gray> started."))
     }
+
+    /**
+     * Starts a matchmaking game between two players
+     * Used by the matchmaking system
+     */
+    fun startMatchmakingGame(white: Player, black: Player): Boolean {
+        if (activeGamesByPlayer.containsKey(white.uniqueId) || activeGamesByPlayer.containsKey(black.uniqueId)) {
+            return false
+        }
+
+        val game = Game()
+        game.start(white, black)
+        activeGamesByPlayer[white.uniqueId] = game
+        activeGamesByPlayer[black.uniqueId] = game
+        return true
+    }
 }

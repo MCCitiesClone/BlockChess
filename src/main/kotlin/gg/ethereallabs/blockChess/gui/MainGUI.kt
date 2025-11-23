@@ -3,6 +3,7 @@ package gg.ethereallabs.blockChess.gui
 import gg.ethereallabs.blockChess.BlockChess
 import gg.ethereallabs.blockChess.config.Config
 import gg.ethereallabs.blockChess.gui.models.BaseMenu
+import gg.ethereallabs.blockChess.matchmaking.MatchmakingManager
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -17,7 +18,8 @@ class MainGUI : BaseMenu("<shift:-48>ⷀ", 54) {
             BlockChess.mm.deserialize("<blue>\uD83C\uDF10 Global Online"),
             Material.IRON_NUGGET,
             mutableListOf(
-                BlockChess.mm.deserialize("<gray>Challenge other players <yellow>across the network<gray>!")
+                BlockChess.mm.deserialize("<gray>Challenge other players <yellow>across the network<gray>!"),
+                BlockChess.mm.deserialize("<red>Currently disabled!")
             ),
             1
         )
@@ -66,18 +68,27 @@ class MainGUI : BaseMenu("<shift:-48>ⷀ", 54) {
         e: InventoryClickEvent?
     ) {
         if(slot > 53) return
+        if(p == null) return
+
         when (slot % 9) {
-            in 0..2 -> {  }
-            in 3..5 -> {  }
+            in 0..2 -> {
+                // Global Online - Currently disabled
+                BlockChess.instance.sendMessage("<red>Global Online is currently disabled!", p)
+                p.playSound(p.location, Sound.ENTITY_VILLAGER_NO, 1f, 1f)
+            }
+            in 3..5 -> {
+                // Online - Join matchmaking
+                p.closeInventory()
+                MatchmakingManager.joinQueue(p)
+            }
             in 6..8 -> {
-                if(p != null) {
-                    if(!Config.botEnabled){
-                        BlockChess.instance.sendMessage("<red>Bots are currently disabled!", p)
-                        p.playSound(p.location, Sound.ENTITY_VILLAGER_NO, 1f, 1f)
-                        return
-                    }
-                    CpuGUI().open(p)
+                // Bot
+                if(!Config.botEnabled){
+                    BlockChess.instance.sendMessage("<red>Bots are currently disabled!", p)
+                    p.playSound(p.location, Sound.ENTITY_VILLAGER_NO, 1f, 1f)
+                    return
                 }
+                CpuGUI().open(p)
             }
         }
     }

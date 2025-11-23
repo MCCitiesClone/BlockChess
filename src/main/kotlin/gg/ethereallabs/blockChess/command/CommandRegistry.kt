@@ -10,6 +10,7 @@ import gg.ethereallabs.blockChess.command.subcommands.InfoCommand
 import gg.ethereallabs.blockChess.command.subcommands.InviteAcceptCommand
 import gg.ethereallabs.blockChess.command.subcommands.InviteCommand
 import gg.ethereallabs.blockChess.command.subcommands.InviteDeclineCommand
+import gg.ethereallabs.blockChess.command.subcommands.LeaveQueueCommand
 import gg.ethereallabs.blockChess.gui.MainGUI
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
@@ -30,6 +31,7 @@ class CommandRegistry : CommandExecutor, TabCompleter {
         registerCommand(InviteDeclineCommand())
         registerCommand(InfoCommand())
         registerCommand(AdminCommands())
+        registerCommand(LeaveQueueCommand())
     }
 
     private fun registerCommand(handler: BaseCommand) {

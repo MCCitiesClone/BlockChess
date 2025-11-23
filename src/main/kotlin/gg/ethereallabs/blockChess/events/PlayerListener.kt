@@ -5,6 +5,7 @@ import gg.ethereallabs.blockChess.data.LocalStorage
 import gg.ethereallabs.blockChess.elo.EloManager
 import gg.ethereallabs.blockChess.game.Game
 import gg.ethereallabs.blockChess.game.GameManager
+import gg.ethereallabs.blockChess.matchmaking.MatchmakingManager
 import gg.ethereallabs.blockChess.utils.InventorySerializer
 import org.bukkit.Bukkit
 import org.bukkit.Sound
@@ -32,6 +33,9 @@ class PlayerListener: Listener {
     fun onPlayerLeave(event: PlayerQuitEvent) {
         val player = event.player
         EloManager.scheduleRemoval(player.uniqueId, BlockChess.instance)
+
+        // Remove from matchmaking queue if present
+        MatchmakingManager.leaveQueue(player.uniqueId)
 
         // Check if player is in an active game and forfeit if so
         val game = GameManager.getGame(player)
