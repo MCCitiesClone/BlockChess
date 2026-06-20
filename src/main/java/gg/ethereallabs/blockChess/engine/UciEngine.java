@@ -28,7 +28,7 @@ public class UciEngine {
         writer = new OutputStreamWriter(process.getOutputStream(), StandardCharsets.UTF_8);
         reader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
 
-        Thread t = new Thread(() -> {
+        Thread.ofVirtual().start(() -> {
             try {
                 while (true) {
                     String line = reader.readLine();
@@ -37,8 +37,6 @@ public class UciEngine {
                 }
             } catch (Exception ignored) {}
         });
-        t.setDaemon(true);
-        t.start();
     }
 
     public void stop() {
