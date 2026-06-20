@@ -2,12 +2,6 @@ name: BlockChess
 version: '1.0'
 main: gg.ethereallabs.blockChess.BlockChess
 api-version: '1.21'
-commands:
-  chess:
-    description: Main command for BlockChess
-    usage: /chess
-    aliases: [chess]
-
 permissions:
   blockchess.*:
     description: Grants all BlockChess permissions
