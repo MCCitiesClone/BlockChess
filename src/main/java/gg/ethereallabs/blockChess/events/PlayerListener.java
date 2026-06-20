@@ -12,9 +12,11 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 
 public class PlayerListener implements Listener {
 
@@ -41,6 +43,32 @@ public class PlayerListener implements Listener {
                     ? Game.ResultType.WHITE_FORFEIT
                     : Game.ResultType.BLACK_FORFEIT;
             game.finalizeGame(forfeitResult);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        Player player = event.getEntity();
+        Game game = GameManager.getGame(player);
+        if (game == null || game.isEnded()) return;
+        // Chess pieces in the player's inventory slots aren't real items — don't drop them
+        event.getDrops().clear();
+        event.setDroppedExp(0);
+    }
+
+    @EventHandler
+    public void onPlayerRespawn(PlayerRespawnEvent event) {
+        Player player = event.getPlayer();
+        Game game = GameManager.getGame(player);
+        if (game != null && !game.isEnded()) {
+            // Game still active — reopen the chess GUI after respawn
+            Bukkit.getScheduler().runTaskLater(BlockChess.instance, () -> {
+                var gui = game.getPlayerGUI(player);
+                if (gui != null) gui.open(player);
+            }, 5L);
+        } else {
+            // Game ended while the player was dead — restore their real inventory now
+            InventorySerializer.restoreInventoryFromPDC(player);
         }
     }
 
@@ -100,7 +128,8 @@ public class PlayerListener implements Listener {
                 && !GameManager.playersPromoting.containsKey(player.getUniqueId())
                 && !GameManager.playersSurrending.containsKey(player.getUniqueId())
                 && !GameManager.playersRequestingDraw.containsKey(player.getUniqueId())
-                && !GameManager.playersAcceptingDraw.containsKey(player.getUniqueId())) {
+                && !GameManager.playersAcceptingDraw.containsKey(player.getUniqueId())
+                && event.getReason() != InventoryCloseEvent.Reason.DEATH) {
             player.getInventory().clear();
             Bukkit.getScheduler().runTaskLater(BlockChess.instance, () -> gui.open(player), 3L);
             BlockChess.instance.sendMessage("<red>You can't close the GUI while in a game!", player);
