@@ -38,6 +38,7 @@ public abstract class BaseMenu implements Listener {
 
     public void open(Player p) {
         if (!p.isOnline()) return;
+        HandlerList.unregisterAll(this);
         inv = Bukkit.createInventory(null, size, title.color(NamedTextColor.WHITE));
         Bukkit.getPluginManager().registerEvents(this, BlockChess.instance);
         viewers.add(p.getUniqueId());

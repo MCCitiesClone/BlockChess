@@ -53,7 +53,6 @@ public class AcceptDrawGUI extends BaseMenu {
         if (draw != null && p != null) {
             choice.accept(draw);
             p.closeInventory();
-            gameGUI.open(p);
         }
     }
 }

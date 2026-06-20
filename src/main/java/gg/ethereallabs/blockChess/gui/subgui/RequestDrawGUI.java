@@ -53,7 +53,6 @@ public class RequestDrawGUI extends BaseMenu {
         if (draw != null && p != null) {
             choice.accept(draw);
             p.closeInventory();
-            gameGUI.open(p);
             if (draw) {
                 BlockChess.instance.sendMessage("<gray>You've requested a draw.", p);
             }

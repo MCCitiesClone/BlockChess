@@ -108,6 +108,8 @@ public class GameManager {
         Player white = game.white;
         Player black = game.black;
 
+        // Set the restore flag before removing from activeGamesByPlayer so that any
+        // inventory close event in this tick will find it and restore correctly.
         Bukkit.getScheduler().runTaskLater(BlockChess.instance, () -> {
             if (white != null && white.isOnline()) {
                 playersAwaitingInvRestore.put(white.getUniqueId(), game.guiWhite);
@@ -115,10 +117,9 @@ public class GameManager {
             if (black != null && black.isOnline()) {
                 playersAwaitingInvRestore.put(black.getUniqueId(), game.guiBlack);
             }
+            if (white != null) activeGamesByPlayer.remove(white.getUniqueId());
+            if (black != null) activeGamesByPlayer.remove(black.getUniqueId());
         }, 2L);
-
-        if (white != null) activeGamesByPlayer.remove(white.getUniqueId());
-        if (black != null) activeGamesByPlayer.remove(black.getUniqueId());
     }
 
     public static void startBot(Player player, int difficulty, EnemyData enemyData) {

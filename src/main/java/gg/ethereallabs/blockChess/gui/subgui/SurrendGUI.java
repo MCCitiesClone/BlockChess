@@ -53,7 +53,6 @@ public class SurrendGUI extends BaseMenu {
         if (resign != null && p != null) {
             choice.accept(resign);
             p.closeInventory();
-            gameGUI.open(p);
         }
     }
 }
