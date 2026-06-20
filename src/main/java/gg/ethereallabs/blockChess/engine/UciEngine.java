@@ -15,6 +15,7 @@ public class UciEngine {
     private Process process;
     private OutputStreamWriter writer;
     private BufferedReader reader;
+    private volatile Thread readerThread;
     private final LinkedBlockingQueue<String> lines = new LinkedBlockingQueue<>();
 
     public UciEngine(String executablePath) {
@@ -28,9 +29,9 @@ public class UciEngine {
         writer = new OutputStreamWriter(process.getOutputStream(), StandardCharsets.UTF_8);
         reader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
 
-        Thread.ofVirtual().start(() -> {
+        readerThread = Thread.ofVirtual().start(() -> {
             try {
-                while (true) {
+                while (!Thread.currentThread().isInterrupted()) {
                     String line = reader.readLine();
                     if (line == null) break;
                     lines.put(line);
@@ -41,6 +42,7 @@ public class UciEngine {
 
     public void stop() {
         try { send("quit"); } catch (Exception ignored) {}
+        if (readerThread != null) readerThread.interrupt();
         if (process != null) process.destroy();
     }
 
