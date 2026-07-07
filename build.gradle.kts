@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "gg.ethereallabs"
-version = "1.0.1"
+version = (findProperty("pluginVersion") as String?) ?: "1.0.1"
 val pluginName = "BlockChess"
 
 repositories {

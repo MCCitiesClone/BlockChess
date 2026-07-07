@@ -1,0 +1,53 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [main]
+
+# Allow the workflow to create tags and releases.
+permissions:
+  contents: write
+
+# Never run more than one release at a time, and let the newest push win.
+concurrency:
+  group: build-release
+  cancel-in-progress: false
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine next version
+        id: version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Bump the patch version on every push unless a commit message
+          # (fix:/feat:/BREAKING CHANGE) asks for a bigger bump. This also
+          # creates and pushes the tag automatically — no manual tagging.
+          default_bump: patch
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Build shaded jar
+        run: >-
+          ./gradlew shadowJar
+          -PpluginVersion=${{ steps.version.outputs.new_version }}
+          -Dorg.gradle.java.home="$JAVA_HOME"
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.new_tag }}
+          name: ${{ steps.version.outputs.new_tag }}
+          body: ${{ steps.version.outputs.changelog }}
+          files: build/libs/*.jar
